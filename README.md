@@ -33,3 +33,28 @@ It gives as output a new set of N<sub>R</sub> Parquet files, stored in a new fol
 ## Syntax
 
 Usage: ParquetRepart (-i, --input path_to_HDFS_folder) (-o, --output path_to_output_dir] [-p, --partitions number_of_parquet_files | -s, --size min_size_of_parquet_file] [-f, --flagoverwrite]
+
+If the new folder already exists on the server, the overwrite flag must be specified; otherwise, an error message is displayed to the user and redistribution of Parquet files is canceled.
+
+Here an example of tool usage:
+```
+ParquetRepart -i /home/parquet_dataset -o /home/parquet_out_dir -p 20
+```
+The previous command will read .parquet files in `parquet_dataset` folder and then will write a new set of twenty .parquet files in `parquet_out_dir`. It is assumed that the input folder contains more than twenty .parquet files.
+
+## ParquetBench
+
+The ParquetBench tool takes as input:
+*  the HDFS folder containing Parquet files. Url form, such as `hdfs://localhost:9000/foo/bar` and absolute path form, such as `/foo/bar`, are both valid
+*  an integer *n* that specifies the number of repetitions of a query test
+
+It gives as output *n* execution times. Basically the ParquetBench tool will perform a benchmark to evaluate the application performance, that is the execution time of a test query on varying of the number of files Parquet.
+
+## Syntax
+
+Usage: ParquetBench (-i, --input path_to_HDFS_folder) (-n, --nloop number_of_repetitions]
+
+Here an example of tool usage:
+```
+ParquetBench -i /home/parquet_dataset -n 20
+```
