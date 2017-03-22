@@ -11,7 +11,7 @@ It gives as output the following descriptive statistics: the total size of the d
 
 ## Syntax
 
-Usage: ParquetStats (-i, --input path_to_HDFS_folder) [-c, --config path_to_configuration_file>]
+Usage: ParquetStats (-i, --input path_to_HDFS_folder) [-c, --config path_to_configuration_file]
 
 The brackets denote optional elements, while parentheses the mandatory ones. You can either use the long or the short version of the two options. If the `-c` option is omitted, the configuration file is searched in the classpath; otherwise, an error message will be displayed to the user. 
 
@@ -32,4 +32,4 @@ It gives as output a new set of N<sub>R</sub> Parquet files, stored in a new fol
 
 ## Syntax
 
-Usage: ParquetRepart (-i, --input path_to_HDFS_folder) [-c, --config path_to_configuration_file>]
+Usage: ParquetRepart (-i, --input path_to_HDFS_folder) (-o, --output path_to_output_dir] [-p, --partitions number_of_parquet_files | -s, --size min_size_of_parquet_file] [-f, --flagoverwrite]
