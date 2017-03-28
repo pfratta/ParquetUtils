@@ -3,9 +3,6 @@ package com.tenaris.bigdata.dataeng.tools;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
@@ -27,93 +24,68 @@ public class ParquetStats {
 
 		FileSystem fileSystem = null;
 		Path inputPath = null;
+		Configuration conf = null;
 		configureLog4jFromSystemProperties();
 		ParquetStatsResults pst = new ParquetStatsResults();
 
 		Options options = configureCommandLineOptions();
-		CommandLine line = HDFSUtils.parseCommandLine(nameApp, descriptionApp, args, options);
-		Configuration conf = init(line);
+		CommandLine line = CLUtils.parseCommandLine(nameApp, descriptionApp, args, options);
 
 		final int BYTES_IN_MB = (int) Math.pow(2, 20);
 
 		try {
-			if (line.hasOption("i")) {
-
-				fileSystem = FileSystem.get(conf);
+			if ( line.hasOption("i") ) {
 				inputPath = new Path(line.getOptionValue('i'));
-
-				if (HDFSUtils.containsFiles(fileSystem, inputPath, ".parquet")) {
-					System.err.println("The folder " + inputPath + " does not contain any .parquet file");
-					System.exit(1);
+				if (line.hasOption("c") ) {
+					conf = HDFSUtils.getConfiguration(line.getOptionValue("c"));
+				} else {
+					conf = HDFSUtils.getConfiguration();	
 				}
-
-				pst = statistics(fileSystem, inputPath, ".parquet");
-
-				// Number of files in the folder
-				System.out.printf("Number of .parquet files: %d\n", pst.getNumFiles());
-
-				// Total size
-				System.out.printf("Total size: %.5f MB\n", pst.getTotalSize() / BYTES_IN_MB);
-
-				// Average
-				System.out.printf("Mean size: %.5f MB\n", pst.getMeanSize() / BYTES_IN_MB);
-
-				// Standard Deviation
-				System.out.printf("Standard deviation: %.5f MB\n", pst.getStandardDeviation() / BYTES_IN_MB);
-
-				// Min value
-				System.out.printf("Min: %.5f MB\n", pst.getMin() / BYTES_IN_MB);
-
-				// Max value
-				System.out.printf("Max: %.5f MB\n", pst.getMax() / BYTES_IN_MB);
-			} else {
-				HDFSUtils.usage(nameApp, descriptionApp, options);
 			}
+			else {
+				CLUtils.usage(nameApp, descriptionApp, options);
+			}
+			
+			fileSystem = FileSystem.get(conf);
+			
+			if (HDFSUtils.containsFiles(fileSystem, inputPath, ".parquet")) {
+				System.err.println("The folder " + inputPath + " does not contain any .parquet file");
+				System.exit(1);
+			}
+
+			pst = statistics(fileSystem, inputPath, ".parquet");
+
+			// Number of files in the folder
+			System.out.printf("Number of .parquet files: %d\n", pst.getNumFiles());
+
+			// Total size
+			System.out.printf("Total size: %.5f MB\n", pst.getTotalSize() / BYTES_IN_MB);
+
+			// Average
+			System.out.printf("Mean size: %.5f MB\n", pst.getMeanSize() / BYTES_IN_MB);
+
+			// Standard Deviation
+			System.out.printf("Standard deviation: %.5f MB\n", pst.getStandardDeviation() / BYTES_IN_MB);
+
+			// Min value
+			System.out.printf("Min: %.5f MB\n", pst.getMin() / BYTES_IN_MB);
+
+			// Max value
+			System.out.printf("Max: %.5f MB\n", pst.getMax() / BYTES_IN_MB);
+
 		} catch (Exception e) {
 			System.err.println("Tha path does not exist");
 			System.exit(1);
 		} finally {
 			try {
-				//sc.stop();
-				fileSystem.close();
+				// sc.stop();
+				if(fileSystem != null) {
+					fileSystem.close();
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private static Configuration init(CommandLine line) {
-
-		System.setProperty("hadoop.home.dir", "/");
-		Configuration conf = new Configuration();
-
-		/*
-		 * The following two instructions resolve the file system overwriting
-		 * issues (cfr.
-		 * http://stackoverflow.com/questions/17265002/hadoop-no-filesystem-for-
-		 * scheme-file)
-		 */
-		conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-		conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-
-		if (line.hasOption("c")) {
-			java.nio.file.Path path = Paths.get(line.getOptionValue("c"));
-			if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-				conf.addResource(line.getOptionValue("c"));
-			} else {
-				System.err.println("The path of namenode configuration file is wrong");
-				System.exit(1);
-			}
-		} else {
-			InputStream inputStream = ParquetStats.class.getClassLoader().getResourceAsStream("core-site.xml");
-			if (inputStream != null) {
-				conf.addResource(inputStream);
-			} else {
-				System.err.println("Cannot find core-site.xml in java classpath");
-				System.exit(1);
-			}
-		}
-		return conf;
 	}
 
 	public static ParquetStatsResults statistics(FileSystem fs, Path input, String fileExtension)

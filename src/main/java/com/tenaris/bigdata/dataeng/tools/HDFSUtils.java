@@ -3,13 +3,10 @@ package com.tenaris.bigdata.dataeng.tools;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,6 +37,31 @@ public class HDFSUtils {
 		}
 		return conf;
 	}
+	
+	public static Configuration getConfiguration(String pathConf) {
+
+		// System.setProperty("hadoop.home.dir", "/");
+		Configuration conf = new Configuration();
+
+		/*
+		 * The following two instructions resolve the file system overwriting
+		 * issues (cfr.
+		 * http://stackoverflow.com/questions/17265002/hadoop-no-filesystem-for-
+		 * scheme-file)
+		 */
+		conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+		conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+
+		java.nio.file.Path path = Paths.get(pathConf);
+		if( Files.exists(path, LinkOption.NOFOLLOW_LINKS) ) {
+			conf.addResource(pathConf);
+		} else {
+			System.err.println("The path of namenode configuration file is wrong");
+			System.exit(1);
+		}
+		
+		return conf;
+	}
 
 	public static boolean containsFiles(FileSystem fs, Path dir, String fileExtension)
 			throws FileNotFoundException, IOException {
@@ -55,23 +77,5 @@ public class HDFSUtils {
 		}
 
 		return true;
-	}
-
-	public static CommandLine parseCommandLine(String nameApp, String descriptionApp, String[] args, Options options) {
-		CommandLineParser parser = new BasicParser();
-		CommandLine cmd = null;
-		try {
-			cmd = parser.parse(options, args);
-		} catch (ParseException e) {
-			usage(nameApp, descriptionApp, options);
-		}
-		return cmd;
-	}
-
-	public static void usage(String nameApp, String descriptionApp, Options options) {
-
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp(nameApp, descriptionApp, options, "");
-		System.exit(1);
 	}
 }

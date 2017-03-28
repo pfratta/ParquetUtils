@@ -19,7 +19,7 @@ public class ParquetRepart {
 
 		Configuration hdfsConfig = HDFSUtils.getConfiguration();
 		Options options = configureCommandLineOptions();
-		CommandLine line = HDFSUtils.parseCommandLine(nameApp, descriptionApp, args, options);
+		CommandLine line = CLUtils.parseCommandLine(nameApp, descriptionApp, args, options);
 
 		SparkConf sparkConf = new SparkConf(); //.setMaster("local[*]").setAppName("ParquetRepart");
 		JavaSparkContext sc = new JavaSparkContext(sparkConf);
@@ -73,11 +73,11 @@ public class ParquetRepart {
 					engine.repartitionByMinDimension( input, output, sizeParquet, line.hasOption("f") );
 				
 				} else {
-					HDFSUtils.usage(nameApp, descriptionApp, options);
+					CLUtils.usage(nameApp, descriptionApp, options);
 				}
 
 			} else {
-				HDFSUtils.usage(nameApp, descriptionApp, options);
+				CLUtils.usage(nameApp, descriptionApp, options);
 			}
 		} catch (NumberFormatException e1) {
 			System.err.println("The typed number is not valid");
