@@ -73,7 +73,7 @@ public class ParquetBench {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
-			System.err.println("Tha path does not exist");
+			System.err.println("The path does not exist");
 			System.exit(1);
 		} finally {
 			try {

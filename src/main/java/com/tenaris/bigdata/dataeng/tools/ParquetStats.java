@@ -26,7 +26,7 @@ public class ParquetStats {
 		Path inputPath = null;
 		Configuration conf = null;
 		configureLog4jFromSystemProperties();
-		ParquetStatsResults pst = new ParquetStatsResults();
+		ParquetStatsBean pst = new ParquetStatsBean();
 
 		Options options = configureCommandLineOptions();
 		CommandLine line = CLUtils.parseCommandLine(nameApp, descriptionApp, args, options);
@@ -88,11 +88,11 @@ public class ParquetStats {
 		}
 	}
 
-	public static ParquetStatsResults statistics(FileSystem fs, Path input, String fileExtension)
+	public static ParquetStatsBean statistics(FileSystem fs, Path input, String fileExtension)
 			throws FileNotFoundException, IOException {
 
 		FileStatus[] status = fs.listStatus(input);
-		ParquetStatsResults par = new ParquetStatsResults();
+		ParquetStatsBean par = new ParquetStatsBean();
 		String pathHDFS;
 		int numFiles = 0;
 		double totalSize = 0.0, meanSize = 0.0, standardDeviation = 0.0, minValue = Double.MAX_VALUE, maxValue = 0.0,

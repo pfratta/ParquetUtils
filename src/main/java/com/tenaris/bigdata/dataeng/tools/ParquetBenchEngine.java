@@ -40,8 +40,8 @@ public class ParquetBenchEngine {
 			System.out.println("Iteration # " + (i + 1) + " of " + numberOfSamples);
 			start = System.nanoTime();
 			
-			dataInput.withColumn("Foo", functions.pow(dataInput.col("ManufacturingWt"), 2))
-					.select("ManufacturingWt", "Foo")
+			dataInput.withColumn("Foo", functions.pow(dataInput.col("peso"), 2))
+					.select("peso", "Foo")
 					.agg(functions.sum("Foo"))
 					.first();
 			

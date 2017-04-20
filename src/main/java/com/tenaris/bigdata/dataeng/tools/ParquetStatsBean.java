@@ -2,7 +2,7 @@ package com.tenaris.bigdata.dataeng.tools;
 
 import java.io.Serializable;
 
-public class ParquetStatsResults implements Serializable {
+public class ParquetStatsBean implements Serializable {
 
 	/*
 	 * File statistics; number of files, total size, avg, std dev, min and max
@@ -18,7 +18,7 @@ public class ParquetStatsResults implements Serializable {
 	private double min;
 	private double max;
 
-	public ParquetStatsResults() {
+	public ParquetStatsBean() {
 	}
 
 	public int getNumFiles() {
