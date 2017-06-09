@@ -21,7 +21,7 @@ public class ParquetRepart {
 		Options options = configureCommandLineOptions();
 		CommandLine line = CLUtils.parseCommandLine(nameApp, descriptionApp, args, options);
 
-		SparkConf sparkConf = new SparkConf(); //.setMaster("local[*]").setAppName("ParquetRepart");
+		SparkConf sparkConf = new SparkConf().setAppName("ParquetRepart"); //.setMaster("local[*]");
 		JavaSparkContext sc = new JavaSparkContext(sparkConf);
 		SQLContext sqlContext = new SQLContext(sc);
 		

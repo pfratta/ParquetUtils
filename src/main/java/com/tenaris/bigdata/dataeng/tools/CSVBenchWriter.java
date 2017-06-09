@@ -6,7 +6,7 @@ import java.util.List;
 
 public class CSVBenchWriter implements BenchResultWriter<ParquetBenchBean> {
 
-	private static final String FILE_HEADER = "exp_name round exec_time(ms)";
+	private static final String FILE_HEADER = "nameOfStrategy sampleId exec_time(ms)";
 	private static final String NEW_LINE_SEPARATOR = "\n";
 
 	public void writeResults(List<ParquetBenchBean> list, String outputPath, String separator) throws IOException {
@@ -18,11 +18,11 @@ public class CSVBenchWriter implements BenchResultWriter<ParquetBenchBean> {
 			fileWriter.append(NEW_LINE_SEPARATOR);
 
 			for (ParquetBenchBean d : list) {
-				fileWriter.append(d.getExpName());
+				fileWriter.append(d.getNameOfStrategy()); // name of strategy
 				fileWriter.append(separator);
-				fileWriter.append(String.valueOf(d.getNumberOfSamples()));
+				fileWriter.append(String.valueOf(d.getSampleId())); // sample_id
 				fileWriter.append(separator);
-				fileWriter.append(String.valueOf(d.getExecutionTimes()));
+				fileWriter.append(String.valueOf(d.getExecutionTime())); // execution time in ms
 				fileWriter.append(NEW_LINE_SEPARATOR);
 			}
 		} catch (IOException e) {

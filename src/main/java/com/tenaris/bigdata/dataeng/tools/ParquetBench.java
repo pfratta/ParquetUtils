@@ -13,23 +13,27 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SQLContext;
 
 public class ParquetBench {
-	
+
 	private static String nameApp = "ParquetBench";
 	private static String descriptionApp = "A command line interface tool to evaluate the performance of a query on a Parquet dataset";
 
 	public static void main(String[] args) {
 
-		int numberOfSamples = 10;    // default value of # samples
-		String csvSeparator = " ";  // default value of .csv separator
+		int numOfSample = 10; // default value of # samples
+		String csvSeparator = " "; // default value of .csv separator
 		String outputPath = "/Users/pacificofratta/Desktop/exec_time.csv"; // default value of output path
-		String expName = null;
-		
+		Class<?> classStrategy = null;
+
+		// Create a query object
+		QueryStrategy qc = null;
+
 		String inputPath = null;
 		Configuration hdfsConfig = HDFSUtils.getConfiguration();
 		Options options = configureCommandLineOptions();
 		CommandLine line = CLUtils.parseCommandLine(nameApp, descriptionApp, args, options);
 
-		SparkConf sparkConf = new SparkConf().setMaster("local[*]").setAppName("ParquetBench");
+		// Add -Dspark.master=local[*] in VM arguments
+		SparkConf sparkConf = new SparkConf().setAppName("ParquetBench");
 		JavaSparkContext sc = new JavaSparkContext(sparkConf);
 		SQLContext sqlContext = new SQLContext(sc);
 
@@ -44,30 +48,36 @@ public class ParquetBench {
 		}
 
 		try {
-			if (line.hasOption("i") && line.hasOption("e")) {
+			if (line.hasOption("i") && line.hasOption("s")) {
 				inputPath = line.getOptionValue('i');
-				expName = line.getOptionValue('e'); 
-				if ( line.hasOption("n") && !line.hasOption("o") ) {
-					numberOfSamples = Integer.parseInt(line.getOptionValue("n"));
+			   
+				classStrategy = Class.forName("com.tenaris.bigdata.dataeng.tools." + line.getOptionValue('s'));
+				qc = (QueryStrategy) classStrategy.getDeclaredConstructor(String.class).newInstance("nome");
+				if (line.hasOption("n") && !line.hasOption("o")) {
+					numOfSample = Integer.parseInt(line.getOptionValue("n"));
 				}
-				if ( !line.hasOption("n") &&  line.hasOption("o") ) {
+				if (!line.hasOption("n") && line.hasOption("o")) {
 					outputPath = line.getOptionValue('o');
 				}
-				if ( line.hasOption("n") &&  line.hasOption("o") ) {
-					numberOfSamples = Integer.parseInt(line.getOptionValue("n"));
+				if (line.hasOption("n") && line.hasOption("o")) {
+					numOfSample = Integer.parseInt(line.getOptionValue("n"));
 					outputPath = line.getOptionValue('o');
 				}
 			} else {
 				CLUtils.usage(nameApp, descriptionApp, options);
 			}
-   
+
 			BenchResultWriter<ParquetBenchBean> writer = new CSVBenchWriter();
 			ParquetBenchEngine engine = new ParquetBenchEngine(fileSystem, sqlContext);
-			List<ParquetBenchBean> list = new ArrayList<ParquetBenchBean>(numberOfSamples);
-			list = engine.queryTestResults(expName, inputPath, numberOfSamples);
+			List<ParquetBenchBean> list = new ArrayList<ParquetBenchBean>(numOfSample);
+			list = engine.queryTestResults(line.getOptionValue('s'), inputPath, numOfSample, qc);
 			writer.writeResults(list, outputPath, csvSeparator);
 
-		} catch (NumberFormatException e1) {
+		} catch (ClassNotFoundException e) {
+            System.err.println("The class does not exist!");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (NumberFormatException e1) {
 			System.err.println("The typed number is not valid");
 			System.exit(1);
 		} catch (IOException e) {
@@ -92,9 +102,13 @@ public class ParquetBench {
 
 		result.addOption("i", "input", true, "specify the input directory from which to read Parquet data files");
 		result.addOption("o", "output", true, "specify the output directory where to write the results file");
+//		result.addOption(OptionBuilder.withLongOpt( "strategy" )
+//				                      .withDescription( "specify the benchmark query to execute on the dataset" )
+//                                      .hasArgs()
+//                                      .withArgName("select")
+//                                      .create('s') );
 		result.addOption("n", "number", true, "specify the number of repetitions of a query test (10 by default)");
-		result.addOption("e", "experiment-name", true, "specify the experiment name");
-
+       
 		return result;
 	}
 }

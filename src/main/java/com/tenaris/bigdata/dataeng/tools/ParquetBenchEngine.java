@@ -4,11 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.functions;
 
 public class ParquetBenchEngine {
 
@@ -20,35 +20,38 @@ public class ParquetBenchEngine {
 		this.sqlContext = sqlContext;
 	}
 
-	public List<ParquetBenchBean> queryTestResults(String expName, String inputPath, int numberOfSamples) throws IOException {
+	public List<ParquetBenchBean> queryTestResults(String nameOfStrategy, String inputPath, int numOfSample,
+			QueryStrategy qc) throws IOException {
 
-		// Leggo il path di input
+		// Read the input path
 		Path input = new Path(inputPath);
 
-		// Controllo se la cartella di input è vuota
+		// Check if the input folder is empty
 		if (HDFSUtils.containsFiles(fileSystem, new Path(inputPath), ".parquet")) {
 			throw new FileNotFoundException("The folder " + inputPath + " does not contain any .parquet file");
 		}
 
 		long start, end;
-		int round = 1;
+		int sampleId = 1;
 		double executionTime;
 		DataFrame dataInput = sqlContext.read().parquet(input.toString());
 		List<ParquetBenchBean> list = new ArrayList<ParquetBenchBean>();
 		
-		for (int i = 0; i < numberOfSamples; i++) {
-			System.out.println("Iteration # " + (i + 1) + " of " + numberOfSamples);
+	    Class<? extends QueryStrategy> qcClass = qc.getClass();
+
+	    // returns the name of the class
+	    nameOfStrategy = qcClass.getSimpleName();
+	    System.out.println("Name of strategy: " + nameOfStrategy);
+		for (int i = 0; i < numOfSample; i++) {
+			System.out.println("Iteration # " + (i + 1) + " of " + numOfSample);
 			start = System.nanoTime();
-			
-			dataInput.withColumn("Foo", functions.pow(dataInput.col("peso"), 2))
-					.select("peso", "Foo")
-					.agg(functions.sum("Foo"))
-					.first();
-			
+
+			qc.doQuery(dataInput);
+
 			end = System.nanoTime();
-			executionTime = ( (double) (end - start) / 1E6 );
-			list.add( new ParquetBenchBean(expName, round, executionTime) );
-			round++;
+			executionTime = ((double) (end - start) / 1E6);
+			list.add(new ParquetBenchBean(nameOfStrategy, sampleId, executionTime));
+			sampleId++;
 		}
 
 		return list;

@@ -6,40 +6,40 @@ public class ParquetBenchBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private int numberOfSamples;
-	private double executionTimes;
-	private String expName;
+	private String nameOfStrategy;
+	private int sampleID;
+	private double executionTime;
 	
 	public ParquetBenchBean() {}
 	
-	public ParquetBenchBean(String expName, int numberOfSamples, double executionTimes) {
-		this.expName = expName;
-		this.numberOfSamples = numberOfSamples;
-		this.executionTimes = executionTimes;
+	public ParquetBenchBean(String nameOfStrategy, int sampleId, double executionTime) {
+		this.nameOfStrategy = nameOfStrategy;
+		this.sampleID = sampleId;
+		this.executionTime = executionTime;
 	}
 
-	public int getNumberOfSamples() {
-		return numberOfSamples;
+	public String getNameOfStrategy() {
+		return nameOfStrategy;
 	}
 
-	public void setNumberOfSamples(int numberOfSamples) {
-		this.numberOfSamples = numberOfSamples;
+	public void setNameOfStrategy(String nameOfStrategy) {
+		this.nameOfStrategy = nameOfStrategy;
 	}
 
-	public double getExecutionTimes() {
-		return executionTimes;
+	public int getSampleId() {
+		return sampleID;
 	}
 
-	public void setExecutionTimes(double executionTimes) {
-		this.executionTimes = executionTimes;
+	public void setSampleId(int sampleId) {
+		this.sampleID = sampleId;
 	}
 
-	public String getExpName() {
-		return expName;
+	public double getExecutionTime() {
+		return executionTime;
 	}
 
-	public void setExpName(String expName) {
-		this.expName = expName;
+	public void setExecutionTime(double executionTime) {
+		this.executionTime = executionTime;
 	}
 
 }

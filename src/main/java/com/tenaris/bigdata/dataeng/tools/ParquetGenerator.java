@@ -40,12 +40,12 @@ public class ParquetGenerator {
 		List<String> names = null;
 
 		// Creo un context Spark
-		SparkConf sparkConf = new SparkConf().setAppName("ParquetRepart");
+		SparkConf sparkConf = new SparkConf().setAppName("ParquetGenerator");
 		JavaSparkContext sc = new JavaSparkContext(sparkConf);
 		SQLContext sqlContext = new SQLContext(sc);
 
 		Random seedGenerator = new Random();
-		int numRows = 0, // number of rows of single partition
+		int numRows = 0, // number of rows of single file
 				numPart = 0; // number of Parquet files
 
 		FileSystem fileSystem = null;
@@ -85,7 +85,7 @@ public class ParquetGenerator {
 				// Leggo il numero di righe
 				numRows = Integer.parseInt(line.getOptionValue('r'));
 				if (numRows <= 0) {
-					System.err.println("The number of Parquet files must be positive");
+					System.err.println("The number of rows in each file must be positive");
 					System.exit(1);
 				}
 				
@@ -156,7 +156,7 @@ public class ParquetGenerator {
 		Options result = new Options();
 		result.addOption("s", "structPath", true,
 				"specify the input file path containing the structure of dataset in the form of key=value pairs");
-		result.addOption("f", "structPath", true, "specify the path of a file .txt containing a set of names");
+		result.addOption("f", "structPath", true, "specify the path of a file .txt containing a set of values");
 		result.addOption("p", "partitions", true, "number of output Parquet data files");
 		result.addOption("r", "rows", true, "number of rows of each Parquet data file");
 		result.addOption("o", "output", true, "specify the output directory in which to store Parquet data files");

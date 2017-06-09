@@ -8,7 +8,7 @@ public class ParquetGeneratorBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int numRecord;
-	Map <String, String> structRecord;
+	private Map <String, String> structRecord;
 	private long seed;
 
 	public ParquetGeneratorBean(int numRecord, long seed, Map <String, String> mappa) {
